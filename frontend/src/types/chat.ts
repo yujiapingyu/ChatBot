@@ -43,6 +43,8 @@ export interface FavoriteItem {
   note?: string
   mastery: 'new' | 'learning' | 'review' | 'mastered'
   createdAt: number
+  lastReviewedAt?: number
+  reviewCount: number
   style?: ConversationStyle
 }
 

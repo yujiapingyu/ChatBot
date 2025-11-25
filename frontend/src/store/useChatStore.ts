@@ -27,6 +27,7 @@ interface ChatState {
   addFavoriteFromFeedback: (originalText: string, correctedSentence: string, explanation: string) => void
   addFavoriteFromSelection: (text: string, translation?: string) => void
   removeFavorite: (favoriteId: string) => void
+  updateFavoriteMastery: (favoriteId: string, isCorrect: boolean) => void
   setSidebarOpen: (flag: boolean) => void
   setFavoritesOpen: (flag: boolean) => void
   updateFlashcardIndex: (delta: number) => void
@@ -196,6 +197,7 @@ export const useChatStore = create<ChatState>()(
           translation,
           source: type === 'reply' ? 'ai-reply' : 'ai-feedback',
           mastery: 'new',
+          reviewCount: 0,
           createdAt: Date.now(),
           style: get().conversationStyle,
         }
@@ -210,6 +212,7 @@ export const useChatStore = create<ChatState>()(
           note: explanation || undefined,
           source: 'ai-feedback',
           mastery: 'new',
+          reviewCount: 0,
           createdAt: Date.now(),
           style: get().conversationStyle,
         }
@@ -223,6 +226,7 @@ export const useChatStore = create<ChatState>()(
           translation,
           source: 'selection',
           mastery: 'new',
+          reviewCount: 0,
           createdAt: Date.now(),
           style: get().conversationStyle,
         }
@@ -230,6 +234,29 @@ export const useChatStore = create<ChatState>()(
       },
       removeFavorite: (favoriteId) => {
         set((state) => ({ favorites: state.favorites.filter((f) => f.id !== favoriteId) }))
+      },
+      updateFavoriteMastery: (favoriteId, isCorrect) => {
+        set((state) => ({
+          favorites: state.favorites.map((fav) => {
+            if (fav.id !== favoriteId) return fav
+            const newReviewCount = fav.reviewCount + 1
+            let newMastery = fav.mastery
+            if (isCorrect) {
+              if (fav.mastery === 'new' && newReviewCount >= 2) newMastery = 'learning'
+              else if (fav.mastery === 'learning' && newReviewCount >= 5) newMastery = 'review'
+              else if (fav.mastery === 'review' && newReviewCount >= 10) newMastery = 'mastered'
+            } else {
+              if (fav.mastery === 'mastered') newMastery = 'review'
+              else if (fav.mastery === 'review') newMastery = 'learning'
+            }
+            return {
+              ...fav,
+              mastery: newMastery,
+              reviewCount: newReviewCount,
+              lastReviewedAt: Date.now(),
+            }
+          }),
+        }))
       },
       setSidebarOpen: (flag) => set({ sidebarOpen: flag }),
       setFavoritesOpen: (flag) => set({ favoritesOpen: flag }),
