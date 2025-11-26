@@ -11,7 +11,7 @@ from app.auth import (
     create_access_token,
     get_current_active_user,
 )
-from app.config import get_settings
+from app.config import get_settings, get_email_whitelist
 
 settings = get_settings()
 router = APIRouter(prefix='/api/auth', tags=['auth'])
@@ -20,6 +20,14 @@ router = APIRouter(prefix='/api/auth', tags=['auth'])
 @router.post('/register', response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user_data: UserRegister, db: Session = Depends(get_db)):
     """用户注册"""
+    # 检查邮箱是否在白名单中
+    whitelist = get_email_whitelist()
+    if user_data.email not in whitelist:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="该邮箱未在白名单中，目前仅限邀请注册"
+        )
+    
     # 检查邮箱是否已存在
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     if existing_user:
