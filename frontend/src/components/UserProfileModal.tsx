@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/store/useAuthStore'
-import { X } from 'lucide-react'
+import { X, Camera } from 'lucide-react'
+import AvatarUpload from './AvatarUpload'
 
 interface UserProfileModalProps {
   isOpen: boolean
@@ -15,15 +16,40 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isEditingAvatar, setIsEditingAvatar] = useState(false)
+  const [avatarKey, setAvatarKey] = useState(0) // 强制重新渲染头像
 
   // 当模态框打开或用户信息变化时，更新用户名
   useEffect(() => {
     if (isOpen && user) {
       setUsername(user.username || user.email.split('@')[0])
+      console.log('UserProfileModal - 用户信息:', {
+        hasAvatar: !!user.avatar,
+        avatarLength: user.avatar?.length,
+        avatarPrefix: user.avatar?.substring(0, 50)
+      })
     }
   }, [isOpen, user])
 
   if (!isOpen || !user) return null
+
+  const handleAvatarSave = async (avatar: string) => {
+    setIsLoading(true)
+    try {
+      console.log('保存头像，avatar 长度:', avatar.length)
+      const updatedUser = await updateProfile({ avatar })
+      console.log('更新后的用户信息:', updatedUser)
+      console.log('用户头像:', user?.avatar?.substring(0, 50))
+      toast.success('头像已更新')
+      setIsEditingAvatar(false)
+      setAvatarKey(prev => prev + 1) // 强制重新渲染
+    } catch (error: any) {
+      console.error('头像更新失败:', error)
+      toast.error(error.message || '头像更新失败')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const handleSave = async () => {
     setIsLoading(true)
@@ -96,12 +122,36 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
           个人信息
         </h2>
 
-        <div className="space-y-4">
+        {isEditingAvatar ? (
+          <AvatarUpload
+            currentAvatar={user.avatar}
+            onSave={handleAvatarSave}
+            onCancel={() => setIsEditingAvatar(false)}
+          />
+        ) : (
+          <div className="space-y-4">
           {/* 头像 */}
           <div className="flex flex-col items-center mb-6">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-3xl font-semibold text-white mb-3">
-              {(user.username || user.email).charAt(0).toUpperCase()}
-            </div>
+            <button
+              onClick={() => setIsEditingAvatar(true)}
+              className="relative group mb-3"
+            >
+              {user.avatar ? (
+                <img
+                  key={avatarKey}
+                  src={user.avatar}
+                  alt="头像"
+                  className="h-20 w-20 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600 group-hover:opacity-75 transition-opacity"
+                />
+              ) : (
+                <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-3xl font-semibold text-white group-hover:opacity-75 transition-opacity">
+                  {(user.username || user.email).charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera size={24} className="text-white" />
+              </div>
+            </button>
             <p className="text-sm text-gray-500 dark:text-gray-400">邮箱: {user.email}</p>
           </div>
 
@@ -206,6 +256,7 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
             </button>
           </div>
         </div>
+        )}
       </div>
     </div>
   )

@@ -91,6 +91,10 @@ def update_me(
     if user_data.avatar is not None:
         current_user.avatar = user_data.avatar
     
+    # 更新时区
+    if user_data.timezone is not None:
+        current_user.timezone = user_data.timezone
+    
     # 更新密码
     if user_data.new_password:
         # 验证当前密码

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from nanoid import generate
+from datetime import datetime
 
 from app.database import get_db
 from app.models import User, Favorite
@@ -35,7 +36,7 @@ def create_favorite(
         user_id=current_user.id,
         text=favorite_data.text,
         translation=favorite_data.translation,
-        source=favorite_data.source,
+        source=favorite_data.source
     )
     db.add(new_favorite)
     db.commit()
@@ -64,7 +65,7 @@ def update_favorite(
     if favorite_data.review_count is not None:
         favorite.review_count = favorite_data.review_count
     if favorite_data.last_reviewed_at is not None:
-        favorite.last_reviewed_at = favorite_data.last_reviewed_at
+        favorite.last_reviewed_at = datetime.utcnow()
     
     db.commit()
     db.refresh(favorite)

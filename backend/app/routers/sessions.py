@@ -31,7 +31,7 @@ def get_sessions(
     return sessions
 
 
-@router.post('/', response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
+@router.post('', response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
 def create_session(
     session_data: SessionCreate,
     current_user: User = Depends(get_current_active_user),
@@ -39,10 +39,10 @@ def create_session(
 ):
     """创建新会话"""
     new_session = DBSession(
-        id=generate(size=21),
+        id=generate(),
         user_id=current_user.id,
         title=session_data.title,
-        conversation_style=session_data.conversation_style,
+        conversation_style=session_data.conversation_style
     )
     db.add(new_session)
     db.commit()
@@ -134,7 +134,7 @@ def add_message(
         content=message_data.content,
         translation=message_data.translation,
         feedback=message_data.feedback,
-        audio_base64=message_data.audio_base64,
+        audio_base64=message_data.audio_base64
     )
     db.add(new_message)
     db.commit()

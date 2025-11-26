@@ -57,10 +57,21 @@ export const authApi = {
 
   updateProfile: async (data: {
     username?: string
+    avatar?: string
     current_password?: string
     new_password?: string
   }): Promise<User> => {
+    console.log('发送 updateProfile 请求:', {
+      hasAvatar: !!data.avatar,
+      avatarLength: data.avatar?.length,
+      data: { ...data, avatar: data.avatar?.substring(0, 50) }
+    })
     const response = await api.put<User>('/api/auth/me', data)
+    console.log('updateProfile 响应:', {
+      hasAvatar: !!response.data.avatar,
+      avatarLength: response.data.avatar?.length,
+      user: { ...response.data, avatar: response.data.avatar?.substring(0, 50) }
+    })
     return response.data
   },
 

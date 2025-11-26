@@ -16,6 +16,7 @@ interface AuthState {
   checkAuth: () => Promise<void>
   updateProfile: (data: {
     username?: string
+    avatar?: string
     current_password?: string
     new_password?: string
   }) => Promise<void>

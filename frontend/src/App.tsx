@@ -336,10 +336,18 @@ function App() {
                   onClick={() => setProfileModalOpen(true)}
                   className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                 >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-sm font-semibold text-white">
-                    {(user.username || user.email).charAt(0).toUpperCase()}
-                  </div>
-                  <span className="text-sm text-gray-700 dark:text-slate-300">{user.username || user.email}</span>
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt="头像"
+                      className="h-8 w-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
+                    />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-sm font-semibold text-white">
+                      {(user.username || user.email).charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span className="text-sm text-gray-700 dark:text-slate-300">{user.username || user.email.split('@')[0]}</span>
                 </button>
                 <button
                   onClick={() => {
