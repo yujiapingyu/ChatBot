@@ -73,7 +73,7 @@ User: "水" (水)
   * 禁止注音，假设用户能读懂常用汉字。
 - feedback.naturalnessScore: 0-100 整数 (语法30% + 场景40% + 流畅度30%)。
 - reply: 严格使用**日文**回应、所有外来语也必须使用片假名。
-- replyTranslation: reply 的中文翻译。
+- replyTranslation: reply 的中文翻译，必须翻译成中文！。
 
 【禁止行为】
 - 严禁在 feedback 中评论或修改你自己的 reply。

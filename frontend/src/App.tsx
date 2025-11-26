@@ -288,8 +288,8 @@ function App() {
         onPrev={() => updateFlashcardIndex(-1)}
       />
       <div className="flex flex-1 flex-col h-full overflow-hidden">
-        <header className="glass-panel sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 px-6 py-4 shrink-0 dark:border-slate-800">
-          <div className="flex items-center gap-4">
+        <header className="glass-panel sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 px-4 py-3 shrink-0 dark:border-slate-800 md:px-6 md:py-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <button
               type="button"
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -298,21 +298,24 @@ function App() {
               <Menu size={20} />
             </button>
             <div>
-              <p className="text-xs uppercase tracking-[0.5em] text-indigo-500 dark:text-indigo-400">Kokoro Coach</p>
-              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">日语口语练习</h1>
-              <p className="text-sm text-gray-600 dark:text-slate-400">AI 日语老师</p>
+              <p className="text-xs uppercase tracking-[0.3em] text-indigo-500 dark:text-indigo-400 md:tracking-[0.5em]">Kokoro Coach</p>
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-white md:text-2xl">日语口语练习</h1>
+              <p className="hidden text-sm text-gray-600 dark:text-slate-400 sm:block">AI 日语老师</p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* 主题切换 - 始终显示 */}
             <button
               type="button"
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="rounded-lg border border-gray-300 bg-white p-2.5 text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="rounded-lg border border-gray-300 bg-white p-2 text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 md:p-2.5"
               title={isDarkMode ? '切换到浅色模式' : '切换到深色模式'}
             >
-              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+              {isDarkMode ? <Sun size={16} className="md:w-[18px] md:h-[18px]" /> : <Moon size={16} className="md:w-[18px] md:h-[18px]" />}
             </button>
-            <div className="flex items-center gap-2">
+            
+            {/* 对话风格 - 桌面端显示 */}
+            <div className="hidden items-center gap-2 lg:flex">
               {STYLE_OPTIONS.map((option) => (
                 <button
                   key={option.value}
@@ -329,39 +332,42 @@ function App() {
                 </button>
               ))}
             </div>
+            
+            {/* 收藏本按钮 */}
             <button
               type="button"
               onClick={() => setFavoritesOpen(true)}
-              className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              className="flex items-center gap-1.5 rounded-full border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 md:gap-2 md:px-4"
             >
               <BookMarked size={16} /> <span className="hidden sm:inline">收藏本</span>
             </button>
+            
             {/* 用户信息 */}
             {isAuthenticated && user && (
-              <div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
+              <div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-2 py-1.5 dark:border-slate-700 dark:bg-slate-800 md:px-3 md:py-2">
                 <button
                   onClick={() => setProfileModalOpen(true)}
-                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                  className="flex items-center gap-1.5 hover:opacity-80 transition-opacity md:gap-2"
                 >
                   {user.avatar ? (
                     <img
                       src={user.avatar}
                       alt="头像"
-                      className="h-8 w-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600"
+                      className="h-7 w-7 rounded-full object-cover border-2 border-gray-200 dark:border-gray-600 md:h-8 md:w-8"
                     />
                   ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-sm font-semibold text-white">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-xs font-semibold text-white md:h-8 md:w-8 md:text-sm">
                       {(user.username || user.email).charAt(0).toUpperCase()}
                     </div>
                   )}
-                  <span className="text-sm text-gray-700 dark:text-slate-300">{user.username || user.email.split('@')[0]}</span>
+                  <span className="hidden text-sm text-gray-700 dark:text-slate-300 md:inline">{user.username || user.email.split('@')[0]}</span>
                 </button>
                 <button
                   onClick={() => {
                     logout()
                     toast.success('已退出登录')
                   }}
-                  className="ml-2 text-xs text-gray-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
+                  className="ml-1 text-xs text-gray-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400 md:ml-2"
                   title="退出登录"
                 >
                   退出
@@ -416,7 +422,26 @@ function App() {
             <div ref={messagesEndRef} />
           </div>
         </main>
-        <footer className="glass-panel border-t border-white/5 px-6 py-4 shrink-0">
+        <footer className="glass-panel border-t border-white/5 px-4 py-3 shrink-0 md:px-6 md:py-4">
+          {/* 对话风格 - 移动端显示 */}
+          <div className="flex items-center justify-center gap-2 mb-3 lg:hidden">
+            {STYLE_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setConversationStyle(option.value)}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                  conversationStyle === option.value
+                    ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30'
+                    : 'border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
+                }`}
+                title={option.description}
+              >
+                {option.icon} {option.label}
+              </button>
+            ))}
+          </div>
+          
           <form onSubmit={handleSubmit} className="mx-auto flex max-w-3xl flex-col gap-3">
             <textarea
               value={input}
