@@ -17,6 +17,7 @@ dependencies = [
   "passlib[bcrypt]~=1.7",
   "python-jose[cryptography]~=3.3",
   "python-multipart~=0.0",
+  "nanoid~=2.0",
 ]
 
 [project.optional-dependencies]
