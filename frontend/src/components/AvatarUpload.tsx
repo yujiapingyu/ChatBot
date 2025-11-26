@@ -4,7 +4,7 @@ import { Upload, X, Check } from 'lucide-react'
 
 interface AvatarUploadProps {
   currentAvatar?: string
-  onSave: (avatar: string) => Promise<void>
+  onSave: (avatar: string) => void
   onCancel: () => void
 }
 
@@ -84,8 +84,8 @@ export default function AvatarUpload({ currentAvatar, onSave, onCancel }: Avatar
     setIsSaving(true)
     try {
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels)
-      await onSave(croppedImage)
-      // 保存成功后不关闭，而是重置状态显示新头像
+      onSave(croppedImage)
+      // 保存成功后重置状态显示新头像
       handleReset()
     } catch (e) {
       console.error(e)

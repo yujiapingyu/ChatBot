@@ -18,6 +18,7 @@ export interface User {
   email: string
   username?: string
   avatar?: string
+  timezone?: string
   is_active: boolean
   is_verified: boolean
 }

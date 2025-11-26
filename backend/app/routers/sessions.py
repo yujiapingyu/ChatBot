@@ -31,7 +31,7 @@ def get_sessions(
     return sessions
 
 
-@router.post('', response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
+@router.post('/', response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
 def create_session(
     session_data: SessionCreate,
     current_user: User = Depends(get_current_active_user),

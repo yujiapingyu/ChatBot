@@ -1,8 +1,10 @@
 import { Download, Trash2, X, BookMarked } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { useChatStore } from '@/store/useChatStore'
+import { useAuthStore } from '@/store/useAuthStore'
 import type { FavoriteItem } from '@/types/chat'
 import { STYLE_LABELS } from '@/constants/styles'
+import { formatDate } from '@/lib/timezone'
 
 interface Props {
   open: boolean
@@ -14,6 +16,7 @@ export const FavoritesDrawer = ({ open, onClose, onOpenFlashcards }: Props) => {
   const favorites = useChatStore((state) => state.favorites)
   const removeFavorite = useChatStore((state) => state.removeFavorite)
   const exportMarkdown = useChatStore((state) => state.exportFavoritesMarkdown)
+  const user = useAuthStore((state) => state.user)
 
   const drawerClass = open ? 'translate-x-0' : 'translate-x-full'
 
@@ -83,11 +86,7 @@ export const FavoritesDrawer = ({ open, onClose, onOpenFlashcards }: Props) => {
                 <div className="flex items-center gap-2">
                   <span>{fav.source}</span>
                   <span className="text-[10px]">
-                    {new Date(fav.createdAt).toLocaleDateString('zh-CN', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                    })}
+                    {formatDate(fav.createdAt, user?.timezone)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

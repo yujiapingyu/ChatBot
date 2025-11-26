@@ -23,6 +23,13 @@ import type { ChatMessage } from '@/types/chat'
 import { STYLE_OPTIONS } from '@/constants/styles'
 
 function App() {
+  // 确保在根路径
+  useEffect(() => {
+    if (window.location.pathname !== '/') {
+      window.history.replaceState(null, '', '/')
+    }
+  }, [])
+
   const {
     sessions,
     activeSessionId,
@@ -293,7 +300,7 @@ function App() {
             <div>
               <p className="text-xs uppercase tracking-[0.5em] text-indigo-500 dark:text-indigo-400">Kokoro Coach</p>
               <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">日语口语练习</h1>
-              <p className="text-sm text-gray-600 dark:text-slate-400">AI 日语老师 + 纠错 + 语音播报</p>
+              <p className="text-sm text-gray-600 dark:text-slate-400">AI 日语老师</p>
             </div>
           </div>
           <div className="flex items-center gap-4">

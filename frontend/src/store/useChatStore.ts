@@ -44,7 +44,7 @@ interface ChatState {
 }
 
 const createWelcomeMessage = (): ChatMessage => ({
-  id: nanoid(),
+  id: 'welcome',
   role: 'assistant',
   content: 'こんにちは！私は Kokoro Coach です。请用日语聊聊你今天的状态或想练习的场景。',
   translation: '你好！我是 Kokoro Coach。先用日语介绍一下你的情况或今天想练习的内容吧。',
@@ -264,8 +264,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
             pendingSessionCreation: null,
           }))
           
-          // 保存欢迎消息
-          const welcomeMsg = session.messages.find(m => m.role === 'assistant')
+          // 保存欢迎消息（跳过 ID 为 'welcome' 的消息）
+          const welcomeMsg = session.messages.find(m => m.role === 'assistant' && m.id !== 'welcome')
           if (welcomeMsg) {
             return sessionApi.addMessage(newSession.id, {
               role: 'assistant',

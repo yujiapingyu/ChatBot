@@ -1,5 +1,7 @@
 import { PlusCircle, Trash2, X } from 'lucide-react'
 import type { ChatSession } from '@/types/chat'
+import { formatTime } from '@/lib/timezone'
+import { useAuthStore } from '@/store/useAuthStore'
 
 interface Props {
   sessions: ChatSession[]
@@ -21,7 +23,10 @@ export const Sidebar = ({
   onDelete,
   onClearAll,
   onClose,
-}: Props) => (
+}: Props) => {
+  const user = useAuthStore((state) => state.user)
+
+  return (
   <>
     {/* Mobile Overlay */}
     <div
@@ -70,7 +75,7 @@ export const Sidebar = ({
               <button type="button" className="w-full text-left" onClick={() => onSelect(session.id)}>
                 <p className="text-sm font-semibold text-gray-900 line-clamp-1 dark:text-white">{session.title}</p>
                 <p className="text-xs text-gray-500 dark:text-slate-400">
-                  {new Date(session.updatedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
+                  {formatTime(session.updatedAt, user?.timezone)}
                 </p>
               </button>
               <button
@@ -90,5 +95,5 @@ export const Sidebar = ({
       </div>
     </aside>
   </>
-)
+)}
 

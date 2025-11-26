@@ -1,6 +1,8 @@
 import { X, ChevronLeft, ChevronRight, CheckCircle2, XCircle } from 'lucide-react'
 import type { FavoriteItem } from '@/types/chat'
 import { useChatStore } from '@/store/useChatStore'
+import { useAuthStore } from '@/store/useAuthStore'
+import { formatDate } from '@/lib/timezone'
 
 interface Props {
   open: boolean
@@ -12,6 +14,7 @@ interface Props {
 
 export const FlashcardModal = ({ open, favorite, onClose, onNext, onPrev }: Props) => {
   const updateFavoriteMastery = useChatStore((state) => state.updateFavoriteMastery)
+  const user = useAuthStore((state) => state.user)
 
   if (!open || !favorite) return null
 
@@ -53,11 +56,7 @@ export const FlashcardModal = ({ open, favorite, onClose, onNext, onPrev }: Prop
             <span>来源：{favorite.source}</span>
             <span>•</span>
             <span>
-              {new Date(favorite.createdAt).toLocaleDateString('zh-CN', {
-                year: 'numeric',
-                month: '2-digit',
-                day: '2-digit',
-              })}
+              {formatDate(favorite.createdAt, user?.timezone)}
             </span>
             {favorite.reviewCount > 0 && (
               <>

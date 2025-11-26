@@ -13,6 +13,7 @@ interface Props {
 
 export const MessageBubble = ({ message, onBookmark, onPlayAudio, isPlaying }: Props) => {
   const isUser = message.role === 'user'
+  const isWelcome = message.id === 'welcome' // 开场白消息
   return (
     <div className={clsx('flex w-full flex-col', isUser ? 'items-end' : 'items-start')}>
       <div
@@ -33,7 +34,7 @@ export const MessageBubble = ({ message, onBookmark, onPlayAudio, isPlaying }: P
         {!isUser && message.translation && (
           <p className="mt-2 text-xs text-gray-600 dark:text-slate-300">{message.translation}</p>
         )}
-        {!isUser && (
+        {!isUser && !isWelcome && (
           <div className="mt-3 flex flex-wrap gap-2 text-xs">
             <button
               type="button"

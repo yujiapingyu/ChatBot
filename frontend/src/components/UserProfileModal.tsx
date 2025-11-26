@@ -12,6 +12,8 @@ interface UserProfileModalProps {
 export default function UserProfileModal({ isOpen, onClose }: UserProfileModalProps) {
   const { user, updateProfile } = useAuthStore()
   const [username, setUsername] = useState('')
+  const [timezone, setTimezone] = useState('Asia/Shanghai')
+  const [avatar, setAvatar] = useState<string | null>(null)
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -19,10 +21,12 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
   const [isEditingAvatar, setIsEditingAvatar] = useState(false)
   const [avatarKey, setAvatarKey] = useState(0) // 强制重新渲染头像
 
-  // 当模态框打开或用户信息变化时，更新用户名
+  // 当模态框打开或用户信息变化时，更新表单状态
   useEffect(() => {
     if (isOpen && user) {
       setUsername(user.username || user.email.split('@')[0])
+      setTimezone(user.timezone || 'Asia/Shanghai')
+      setAvatar(user.avatar || null)
       console.log('UserProfileModal - 用户信息:', {
         hasAvatar: !!user.avatar,
         avatarLength: user.avatar?.length,
@@ -33,22 +37,11 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
 
   if (!isOpen || !user) return null
 
-  const handleAvatarSave = async (avatar: string) => {
-    setIsLoading(true)
-    try {
-      console.log('保存头像，avatar 长度:', avatar.length)
-      const updatedUser = await updateProfile({ avatar })
-      console.log('更新后的用户信息:', updatedUser)
-      console.log('用户头像:', user?.avatar?.substring(0, 50))
-      toast.success('头像已更新')
-      setIsEditingAvatar(false)
-      setAvatarKey(prev => prev + 1) // 强制重新渲染
-    } catch (error: any) {
-      console.error('头像更新失败:', error)
-      toast.error(error.message || '头像更新失败')
-    } finally {
-      setIsLoading(false)
-    }
+  const handleAvatarSave = (avatarData: string) => {
+    // 只更新本地状态，不立即保存到后端
+    setAvatar(avatarData)
+    setIsEditingAvatar(false)
+    setAvatarKey(prev => prev + 1)
   }
 
   const handleSave = async () => {
@@ -70,6 +63,8 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
       // 准备更新数据
       const updateData: {
         username?: string
+        avatar?: string
+        timezone?: string
         current_password?: string
         new_password?: string
       } = {}
@@ -77,6 +72,16 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
       // 只有当用户名发生变化时才更新
       if (username && username !== (user?.username || user?.email.split('@')[0])) {
         updateData.username = username
+      }
+
+      // 只有当头像发生变化时才更新
+      if (avatar !== user?.avatar) {
+        updateData.avatar = avatar || undefined
+      }
+
+      // 只有当时区发生变化时才更新
+      if (timezone !== user?.timezone) {
+        updateData.timezone = timezone
       }
 
       // 只有当输入了新密码时才更新
@@ -100,6 +105,8 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
       setCurrentPassword('')
       setNewPassword('')
       setConfirmPassword('')
+      // 更新头像显示
+      setAvatarKey(prev => prev + 1)
       onClose()
     } catch (error: any) {
       toast.error(error.message || '更新失败')
@@ -109,37 +116,38 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-8 m-4 relative">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col relative">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          className="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
         >
           <X size={24} />
         </button>
 
-        <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">
+        <h2 className="text-2xl font-bold text-center pt-8 px-8 pb-6 text-gray-900 dark:text-white flex-shrink-0">
           个人信息
         </h2>
 
-        {isEditingAvatar ? (
-          <AvatarUpload
-            currentAvatar={user.avatar}
-            onSave={handleAvatarSave}
-            onCancel={() => setIsEditingAvatar(false)}
-          />
-        ) : (
-          <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto px-8 pb-8">
+          {isEditingAvatar ? (
+            <AvatarUpload
+              currentAvatar={avatar || undefined}
+              onSave={handleAvatarSave}
+              onCancel={() => setIsEditingAvatar(false)}
+            />
+          ) : (
+            <div className="space-y-4">
           {/* 头像 */}
           <div className="flex flex-col items-center mb-6">
             <button
               onClick={() => setIsEditingAvatar(true)}
               className="relative group mb-3"
             >
-              {user.avatar ? (
+              {avatar ? (
                 <img
                   key={avatarKey}
-                  src={user.avatar}
+                  src={avatar}
                   alt="头像"
                   className="h-20 w-20 rounded-full object-cover border-4 border-gray-200 dark:border-gray-600 group-hover:opacity-75 transition-opacity"
                 />
@@ -171,6 +179,35 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
                        transition-all duration-200"
               placeholder="输入用户名"
             />
+          </div>
+
+          {/* 时区选择 */}
+          <div>
+            <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              时区
+            </label>
+            <select
+              id="timezone"
+              value={timezone}
+              onChange={(e) => setTimezone(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 
+                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                       focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                       transition-all duration-200"
+            >
+              <option value="Asia/Shanghai">中国 (Asia/Shanghai)</option>
+              <option value="Asia/Tokyo">日本 (Asia/Tokyo)</option>
+              <option value="Asia/Seoul">韩国 (Asia/Seoul)</option>
+              <option value="Asia/Hong_Kong">香港 (Asia/Hong_Kong)</option>
+              <option value="Asia/Taipei">台湾 (Asia/Taipei)</option>
+              <option value="Asia/Singapore">新加坡 (Asia/Singapore)</option>
+              <option value="UTC">UTC (协调世界时)</option>
+              <option value="America/New_York">美国东部 (America/New_York)</option>
+              <option value="America/Los_Angeles">美国西部 (America/Los_Angeles)</option>
+              <option value="Europe/London">英国 (Europe/London)</option>
+              <option value="Europe/Paris">法国 (Europe/Paris)</option>
+              <option value="Australia/Sydney">澳大利亚 (Australia/Sydney)</option>
+            </select>
           </div>
 
           {/* 修改密码区域 */}
@@ -257,6 +294,7 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
           </div>
         </div>
         )}
+        </div>
       </div>
     </div>
   )

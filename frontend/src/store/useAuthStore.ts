@@ -17,6 +17,7 @@ interface AuthState {
   updateProfile: (data: {
     username?: string
     avatar?: string
+    timezone?: string
     current_password?: string
     new_password?: string
   }) => Promise<void>
