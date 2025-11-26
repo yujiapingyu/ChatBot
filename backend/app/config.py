@@ -8,7 +8,7 @@ class Settings(BaseSettings):
   google_api_key: str
   chat_model: str = 'gemini-2.0-flash-exp'
   tts_model: str = 'gemini-2.5-flash-preview-tts'
-  cors_origins: str = 'http://localhost:5173'
+  cors_origins: List[str] = ['http://localhost:5173']
   
   # 数据库配置
   database_url: str = 'sqlite:///./chatbot.db'
@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     if isinstance(v, str):
       # 支持逗号分隔的字符串
       return [origin.strip() for origin in v.split(',')]
+    elif isinstance(v, list):
+      # 如果已经是列表，直接返回
+      return v
     return v
 
   class Config:
