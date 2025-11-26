@@ -19,5 +19,6 @@ export default defineConfig({
         changeOrigin: true,
       },
     },
+    allowedHosts: ['japanesetalk.org', '165.154.226.92', 'localhost']
   },
 })
