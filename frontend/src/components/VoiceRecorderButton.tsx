@@ -11,10 +11,10 @@ export const VoiceRecorderButton = ({ isListening, onToggle, disabled }: Props) 
     type="button"
     onClick={onToggle}
     disabled={disabled}
-    className={`rounded-full border px-3 py-2 text-xs font-medium transition ${
+    className={`rounded-full border-2 px-3 py-2 text-xs font-medium transition ${
       isListening
         ? 'border-rose-400 bg-rose-500/20 text-rose-600 dark:text-rose-100'
-        : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-white/10 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-indigo-300 dark:hover:bg-slate-700'
+        : 'border-indigo-400 bg-white text-gray-700 hover:bg-indigo-50 dark:border-white/10 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-indigo-300 dark:hover:bg-slate-700'
     } disabled:cursor-not-allowed disabled:opacity-50`}
   >
     <span className="flex items-center gap-2">

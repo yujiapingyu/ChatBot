@@ -12,7 +12,21 @@ export const useSelectionBookmark = () => {
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
 
-    const handleMouseUp = () => {
+    const handleMouseUp = (e: MouseEvent) => {
+      // 检查选中是否在对话区域内
+      const chatMessages = document.getElementById('chat-messages')
+      if (!chatMessages || !e.target) {
+        setSelectionState(null)
+        return
+      }
+
+      // 检查点击目标是否在 chat-messages 内
+      const target = e.target as Node
+      if (!chatMessages.contains(target)) {
+        setSelectionState(null)
+        return
+      }
+
       const selection = window.getSelection()
       if (!selection || selection.isCollapsed) {
         setSelectionState(null)

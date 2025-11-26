@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useState, useRef, useEffect } from 'react'
 import type { FormEvent } from 'react'
-import { Sparkles, Star, BookMarked, Menu, Sun, Moon } from 'lucide-react'
+import { Star, BookMarked, Menu, Sun, Moon } from 'lucide-react'
 import { Toaster, toast } from 'sonner'
 import './App.css'
 import './index.css'
@@ -12,9 +12,12 @@ import { FavoritesDrawer } from '@/components/FavoritesDrawer'
 import { FlashcardModal } from '@/components/FlashcardModal'
 import { LoadingDots } from '@/components/LoadingDots'
 import { CorrectionCard } from '@/components/CorrectionCard'
+import AuthModal from '@/components/AuthModal'
+import UserProfileModal from '@/components/UserProfileModal'
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition'
 import { useAudioPlayer } from '@/hooks/useAudioPlayer'
 import { useChatStore } from '@/store/useChatStore'
+import { useAuthStore } from '@/store/useAuthStore'
 import { requestChat, requestTts, requestTitle } from '@/lib/api'
 import type { ChatMessage } from '@/types/chat'
 import { STYLE_OPTIONS } from '@/constants/styles'
@@ -45,20 +48,59 @@ function App() {
     setConversationStyle,
     sidebarOpen,
     setSidebarOpen,
+    loadSessions,
+    loadFavorites,
   } = useChatStore()
+  const { isAuthenticated, isInitializing, checkAuth, user, logout } = useAuthStore()
   const activeSession = useMemo(
     () => sessions.find((session) => session.id === (activeSessionId ?? sessions[0]?.id)),
     [sessions, activeSessionId],
   )
   const [input, setInput] = useState('')
   const [flashcardOpen, setFlashcardOpen] = useState(false)
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [profileModalOpen, setProfileModalOpen] = useState(false)
+  const [clearAllModalOpen, setClearAllModalOpen] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme')
     return saved ? saved === 'dark' : true
   })
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const hasInitialized = useRef(false) // 追踪是否已初始化
 
   const { isPlaying, currentId, playBase64, stop } = useAudioPlayer()
+
+  // 检查认证状态
+  useEffect(() => {
+    void checkAuth()
+  }, [checkAuth])
+
+  // 登录成功后加载数据
+  useEffect(() => {
+    const initializeData = async () => {
+      if (isAuthenticated && !hasInitialized.current) {
+        console.log('[App] 开始初始化...')
+        hasInitialized.current = true
+        await loadSessions()
+        await loadFavorites()
+        console.log('[App] 初始化完成')
+      } else if (!isAuthenticated) {
+        // 退出登录时重置初始化状态
+        hasInitialized.current = false
+      }
+    }
+    void initializeData()
+  }, [isAuthenticated, loadSessions, loadFavorites])
+
+  // 控制登录模态框显示
+  useEffect(() => {
+    // 只有在初始化完成且未认证时才显示登录框
+    if (!isInitializing && !isAuthenticated) {
+      setAuthModalOpen(true)
+    } else {
+      setAuthModalOpen(false)
+    }
+  }, [isAuthenticated, isInitializing])
 
   // 自动滚动到底部
   useEffect(() => {
@@ -92,15 +134,28 @@ function App() {
     const userMessageCount = activeSession.messages.filter((msg) => msg.role === 'user').length
     const shouldGenerateTitle = userMessageCount === 0
     const userMessage = appendUserMessage(text)
+    if (!userMessage) return // 如果没有会话，直接返回
     markSending(true)
     try {
       const contextMessages = [...rollingWindow(), { ...userMessage }]
       const aiPayload = await requestChat(activeSession.id, contextMessages, conversationStyle)
-      const assistantMessage = applyAiResponse(aiPayload)
+      const assistantMessage = await applyAiResponse(aiPayload)
+      
+      // 生成并更新标题
       if (shouldGenerateTitle) {
-        const title = await requestTitle(`${text}\n${aiPayload.reply}`)
-        updateSessionTitle(activeSession.id, title)
+        // 不使用 setTimeout，直接等待
+        try {
+          const title = await requestTitle(`${text}\n${aiPayload.reply}`)
+          // 从 store 获取最新的 activeSessionId
+          const latestSessionId = useChatStore.getState().activeSessionId
+          if (latestSessionId) {
+            await updateSessionTitle(latestSessionId, title)
+          }
+        } catch (err) {
+          console.error('生成标题失败:', err)
+        }
       }
+      
       // 自动播放 AI 回复的音频
       if (assistantMessage.audioBase64) {
         setTimeout(() => {
@@ -161,9 +216,51 @@ function App() {
     toast.success('已加入收藏本')
   }
 
+  const handleClearAll = async () => {
+    await clearSessions()
+    setClearAllModalOpen(false)
+    toast.success('已清空所有对话')
+  }
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50 text-gray-900 transition-colors dark:bg-slate-900 dark:text-slate-50">
       <Toaster position="top-right" richColors />
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
+      <UserProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
+      
+      {/* 清空对话确认模态框 */}
+      {clearAllModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md p-8 m-4">
+            <h2 className="text-xl font-bold text-center mb-4 text-gray-900 dark:text-white">
+              确认清空所有对话？
+            </h2>
+            <p className="text-center text-gray-600 dark:text-gray-400 mb-6">
+              此操作将删除所有对话记录，且无法恢复。
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setClearAllModalOpen(false)}
+                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600
+                         text-gray-700 dark:text-gray-300 font-medium
+                         hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+              >
+                取消
+              </button>
+              <button
+                onClick={handleClearAll}
+                className="flex-1 bg-red-500 text-white py-3 rounded-lg
+                         font-semibold hover:bg-red-600
+                         transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]
+                         shadow-lg hover:shadow-xl"
+              >
+                确认清空
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <SelectionBookmark />
       <Sidebar
         sessions={sessions}
@@ -172,7 +269,7 @@ function App() {
         onSelect={setActiveSession}
         onCreate={createSession}
         onDelete={deleteSession}
-        onClearAll={clearSessions}
+        onClearAll={() => setClearAllModalOpen(true)}
         onClose={() => setSidebarOpen(false)}
       />
       <FavoritesDrawer open={favoritesOpen} onClose={() => setFavoritesOpen(false)} onOpenFlashcards={() => setFlashcardOpen(true)} />
@@ -232,16 +329,33 @@ function App() {
             >
               <BookMarked size={16} /> <span className="hidden sm:inline">收藏本</span>
             </button>
-            <button
-              type="button"
-              onClick={createSession}
-              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-4 py-2 text-sm text-white shadow-lg shadow-indigo-500/30 transition-all hover:shadow-xl hover:shadow-indigo-500/40"
-            >
-              <Sparkles size={16} /> <span className="hidden sm:inline">新话题</span>
-            </button>
+            {/* 用户信息 */}
+            {isAuthenticated && user && (
+              <div className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-800">
+                <button
+                  onClick={() => setProfileModalOpen(true)}
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                >
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 text-sm font-semibold text-white">
+                    {(user.username || user.email).charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-sm text-gray-700 dark:text-slate-300">{user.username || user.email}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    logout()
+                    toast.success('已退出登录')
+                  }}
+                  className="ml-2 text-xs text-gray-500 hover:text-red-600 dark:text-slate-400 dark:hover:text-red-400"
+                  title="退出登录"
+                >
+                  退出
+                </button>
+              </div>
+            )}
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto px-4 py-6 md:px-10 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+        <main id="chat-messages" className="flex-1 overflow-y-auto px-4 py-6 md:px-10 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
           <div className="mx-auto flex max-w-3xl flex-col gap-6 pb-4">
             {activeSession?.messages.map((message, index) => {
               const nextMessage = activeSession.messages[index + 1]
