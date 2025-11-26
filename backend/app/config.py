@@ -1,4 +1,6 @@
 from functools import lru_cache
+from typing import List
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -6,7 +8,7 @@ class Settings(BaseSettings):
   google_api_key: str
   chat_model: str = 'gemini-2.0-flash-exp'
   tts_model: str = 'gemini-2.5-flash-preview-tts'
-  cors_origins: list[str] = ['http://localhost:5173']
+  cors_origins: str = 'http://localhost:5173'
   
   # 数据库配置
   database_url: str = 'sqlite:///./chatbot.db'
@@ -15,6 +17,14 @@ class Settings(BaseSettings):
   secret_key: str = 'your-secret-key-change-in-production'
   algorithm: str = 'HS256'
   access_token_expire_minutes: int = 60 * 24 * 7  # 7 天
+
+  @field_validator('cors_origins', mode='before')
+  @classmethod
+  def parse_cors_origins(cls, v):
+    if isinstance(v, str):
+      # 支持逗号分隔的字符串
+      return [origin.strip() for origin in v.split(',')]
+    return v
 
   class Config:
     env_file = '.env'
