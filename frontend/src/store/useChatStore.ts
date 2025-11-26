@@ -19,7 +19,7 @@ interface ChatState {
   deleteSession: (sessionId: string) => void
   clearSessions: () => void
   appendUserMessage: (text: string) => ChatMessage
-  applyAiResponse: (payload: AiResponsePayload) => void
+  applyAiResponse: (payload: AiResponsePayload) => ChatMessage
   updateMessage: (messageId: string, patch: Partial<ChatMessage>) => void
   updateSessionTitle: (sessionId: string, title: string) => void
   markSending: (flag: boolean) => void
@@ -167,6 +167,7 @@ export const useChatStore = create<ChatState>()(
               : s,
           ),
         }))
+        return assistantMessage
       },
       updateMessage: (messageId, patch) => {
         set((state) => ({

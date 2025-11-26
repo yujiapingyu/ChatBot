@@ -1,6 +1,6 @@
 import { Fragment, useMemo, useState, useRef, useEffect } from 'react'
 import type { FormEvent } from 'react'
-import { Sparkles, Star, BookMarked, Menu } from 'lucide-react'
+import { Sparkles, Star, BookMarked, Menu, Sun, Moon } from 'lucide-react'
 import { Toaster, toast } from 'sonner'
 import './App.css'
 import './index.css'
@@ -52,6 +52,10 @@ function App() {
   )
   const [input, setInput] = useState('')
   const [flashcardOpen, setFlashcardOpen] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme')
+    return saved ? saved === 'dark' : true
+  })
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const { isPlaying, currentId, playBase64, stop } = useAudioPlayer()
@@ -60,6 +64,18 @@ function App() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [activeSession?.messages, isSending])
+
+  // 主题切换
+  useEffect(() => {
+    const root = document.documentElement
+    if (isDarkMode) {
+      root.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
+    } else {
+      root.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
+    }
+  }, [isDarkMode])
 
   const speech = useSpeechRecognition({
     onResult: (text) => {
@@ -80,10 +96,21 @@ function App() {
     try {
       const contextMessages = [...rollingWindow(), { ...userMessage }]
       const aiPayload = await requestChat(activeSession.id, contextMessages, conversationStyle)
-      applyAiResponse(aiPayload)
+      const assistantMessage = applyAiResponse(aiPayload)
       if (shouldGenerateTitle) {
         const title = await requestTitle(`${text}\n${aiPayload.reply}`)
         updateSessionTitle(activeSession.id, title)
+      }
+      // 自动播放 AI 回复的音频
+      if (assistantMessage.audioBase64) {
+        setTimeout(() => {
+          console.log('[Auto-play] Playing audio for message:', assistantMessage.id)
+          void playBase64(assistantMessage.id, assistantMessage.audioBase64!).catch((err) => {
+            console.error('[Auto-play] Failed to play audio:', err)
+          })
+        }, 300)
+      } else {
+        console.log('[Auto-play] No audio data in response')
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : '发送失败'
@@ -135,7 +162,7 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-950/80 text-slate-50">
+    <div className="flex h-screen w-full overflow-hidden bg-gray-50 text-gray-900 transition-colors dark:bg-slate-900 dark:text-slate-50">
       <Toaster position="top-right" richColors />
       <SelectionBookmark />
       <Sidebar
@@ -157,7 +184,7 @@ function App() {
         onPrev={() => updateFlashcardIndex(-1)}
       />
       <div className="flex flex-1 flex-col h-full overflow-hidden">
-        <header className="glass-panel sticky top-0 z-10 flex items-center justify-between border-b border-white/5 px-6 py-4 shrink-0">
+        <header className="glass-panel sticky top-0 z-10 flex items-center justify-between border-b border-gray-200 px-6 py-4 shrink-0 dark:border-slate-800">
           <div className="flex items-center gap-4">
             <button
               type="button"
@@ -167,12 +194,20 @@ function App() {
               <Menu size={20} />
             </button>
             <div>
-              <p className="text-xs uppercase tracking-[0.5em] text-indigo-200">Kokoro Coach</p>
-              <h1 className="text-2xl font-semibold text-white">日语口语练习</h1>
-              <p className="text-sm text-slate-400">AI 日语老师 + 纠错 + 语音播报</p>
+              <p className="text-xs uppercase tracking-[0.5em] text-indigo-500 dark:text-indigo-400">Kokoro Coach</p>
+              <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">日语口语练习</h1>
+              <p className="text-sm text-gray-600 dark:text-slate-400">AI 日语老师 + 纠错 + 语音播报</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="rounded-lg border border-gray-300 bg-white p-2.5 text-gray-700 shadow-sm transition-all hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+              title={isDarkMode ? '切换到浅色模式' : '切换到深色模式'}
+            >
+              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
             <div className="flex items-center gap-2">
               {STYLE_OPTIONS.map((option) => (
                 <button
@@ -181,8 +216,8 @@ function App() {
                   onClick={() => setConversationStyle(option.value)}
                   className={`rounded-full px-4 py-2 text-xs font-medium transition-all ${
                     conversationStyle === option.value
-                      ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/50'
-                      : 'border border-white/10 bg-slate-900/40 text-slate-300 hover:bg-white/5 hover:text-white'
+                      ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg shadow-indigo-500/30'
+                      : 'border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
                   }`}
                   title={option.description}
                 >
@@ -193,14 +228,14 @@ function App() {
             <button
               type="button"
               onClick={() => setFavoritesOpen(true)}
-              className="flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm text-slate-100 hover:bg-white/5 transition-colors"
+              className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 shadow-sm transition-colors hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
             >
               <BookMarked size={16} /> <span className="hidden sm:inline">收藏本</span>
             </button>
             <button
               type="button"
               onClick={createSession}
-              className="flex items-center gap-2 rounded-full bg-indigo-600/80 px-4 py-2 text-sm text-white shadow-glass hover:bg-indigo-500 transition-colors"
+              className="flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-4 py-2 text-sm text-white shadow-lg shadow-indigo-500/30 transition-all hover:shadow-xl hover:shadow-indigo-500/40"
             >
               <Sparkles size={16} /> <span className="hidden sm:inline">新话题</span>
             </button>
@@ -254,7 +289,7 @@ function App() {
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="输入日语句子，⌘+Enter 发送（Windows 用 Ctrl+Enter），Shift+Enter 换行"
-              className="min-h-[120px] w-full rounded-3xl border border-white/10 bg-slate-900/40 px-5 py-4 text-sm text-white focus:border-indigo-300 focus:outline-none resize-none"
+              className="min-h-[120px] w-full rounded-2xl border border-gray-300 bg-white px-5 py-4 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 resize-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-indigo-400"
             />
             <div className="flex flex-wrap items-center justify-between gap-3">
               <VoiceRecorderButton
@@ -267,7 +302,7 @@ function App() {
                 <button
                   type="submit"
                   disabled={isSending}
-                  className="flex items-center gap-2 rounded-full bg-indigo-600/80 px-6 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40 hover:bg-indigo-500 transition-colors"
+                  className="flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/30 transition-all hover:shadow-xl hover:shadow-indigo-500/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Star size={16} /> 发送
                 </button>

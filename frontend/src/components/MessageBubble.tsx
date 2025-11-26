@@ -17,27 +17,27 @@ export const MessageBubble = ({ message, onBookmark, onPlayAudio, isPlaying }: P
     <div className={clsx('flex w-full flex-col', isUser ? 'items-end' : 'items-start')}>
       <div
         className={clsx(
-          'max-w-xl rounded-3xl border px-5 py-4 text-sm shadow-glass',
+          'max-w-xl rounded-3xl border px-5 py-4 text-sm shadow-md',
           isUser
-            ? 'border-indigo-400/40 bg-indigo-600/30 text-white'
-            : 'border-white/10 bg-white/5 text-slate-100',
+            ? 'border-indigo-200 bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-indigo-200/50 dark:border-indigo-400/40 dark:bg-indigo-600/30 dark:shadow-indigo-500/20'
+            : 'border-gray-200 bg-white text-gray-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-100',
         )}
       >
         {isUser ? (
           <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
         ) : (
-          <div className="prose prose-invert max-w-none text-sm leading-relaxed">
+          <div className="prose prose-sm max-w-none leading-relaxed dark:prose-invert">
             <ReactMarkdown>{message.content}</ReactMarkdown>
           </div>
         )}
         {!isUser && message.translation && (
-          <p className="mt-2 text-xs text-slate-300">{message.translation}</p>
+          <p className="mt-2 text-xs text-gray-600 dark:text-slate-300">{message.translation}</p>
         )}
         {!isUser && (
-          <div className="mt-3 flex flex-wrap gap-2 text-xs text-slate-400">
+          <div className="mt-3 flex flex-wrap gap-2 text-xs">
             <button
               type="button"
-              className="inline-flex items-center gap-1 rounded-full border border-white/10 px-3 py-1 hover:border-indigo-300"
+              className="inline-flex items-center gap-1 rounded-full border border-gray-300 bg-gray-50 px-3 py-1 text-gray-700 transition-colors hover:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:border-indigo-300 dark:hover:text-slate-200"
               onClick={() => onBookmark(message.id, 'reply', message.content, message.translation)}
             >
               <Bookmark size={14} /> 收藏整句
