@@ -374,6 +374,10 @@ function App() {
           <div className="mx-auto flex max-w-3xl flex-col gap-6 pb-4">
             {activeSession?.messages.map((message, index) => {
               const nextMessage = activeSession.messages[index + 1]
+              // 检查是否是第一条 assistant 消息（开圼白）
+              const isFirstAssistantMessage = message.role === 'assistant' && 
+                index === 0 || 
+                (index > 0 && activeSession.messages.slice(0, index).every(m => m.role === 'user'))
               const feedbackCard =
                 message.role === 'user' && nextMessage?.feedback
                   ? {
@@ -388,6 +392,7 @@ function App() {
                     onBookmark={handleBookmark}
                     onPlayAudio={handleAudio}
                     isPlaying={currentId === message.id && isPlaying}
+                    isFirstAssistantMessage={isFirstAssistantMessage}
                   />
                   {feedbackCard && (
                     <div className="flex w-full justify-end">

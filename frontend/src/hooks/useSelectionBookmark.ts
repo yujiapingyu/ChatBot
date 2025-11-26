@@ -13,6 +13,13 @@ export const useSelectionBookmark = () => {
     if (typeof window === 'undefined') return undefined
 
     const handleMouseUp = (e: MouseEvent) => {
+      // 如果点击的是收藏按钮，不要清除选区
+      const target = e.target as HTMLElement
+      if (target.closest('button')?.textContent?.includes('收藏选区')) {
+        console.log('[useSelectionBookmark] 点击了收藏按钮，保持选区')
+        return
+      }
+
       // 检查选中是否在对话区域内
       const chatMessages = document.getElementById('chat-messages')
       if (!chatMessages || !e.target) {
@@ -21,8 +28,8 @@ export const useSelectionBookmark = () => {
       }
 
       // 检查点击目标是否在 chat-messages 内
-      const target = e.target as Node
-      if (!chatMessages.contains(target)) {
+      const targetNode = e.target as Node
+      if (!chatMessages.contains(targetNode)) {
         setSelectionState(null)
         return
       }
@@ -39,7 +46,9 @@ export const useSelectionBookmark = () => {
       }
       const range = selection.getRangeAt(0)
       const rect = range.getBoundingClientRect()
-      setSelectionState({ text, x: rect.x + rect.width / 2, y: rect.y })
+      const state = { text, x: rect.x + rect.width / 2, y: rect.y }
+      console.log('[useSelectionBookmark] 选中文本:', text, '位置:', state)
+      setSelectionState(state)
     }
 
     document.addEventListener('mouseup', handleMouseUp)

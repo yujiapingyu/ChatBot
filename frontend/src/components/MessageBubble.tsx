@@ -9,11 +9,13 @@ interface Props {
   onBookmark: (messageId: string, type: 'reply' | 'feedback', text: string, translation?: string) => void
   onPlayAudio: (message: ChatMessage) => void
   isPlaying: boolean
+  isFirstAssistantMessage?: boolean
 }
 
-export const MessageBubble = ({ message, onBookmark, onPlayAudio, isPlaying }: Props) => {
+export const MessageBubble = ({ message, onBookmark, onPlayAudio, isPlaying, isFirstAssistantMessage = false }: Props) => {
   const isUser = message.role === 'user'
-  const isWelcome = message.id === 'welcome' // 开场白消息
+  // 开圼白消息：ID 为 'welcome' 或者是第一条 AI 消息
+  const isWelcome = message.id === 'welcome' || isFirstAssistantMessage
   return (
     <div className={clsx('flex w-full flex-col', isUser ? 'items-end' : 'items-start')}>
       <div
