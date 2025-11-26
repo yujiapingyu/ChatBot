@@ -45,6 +45,7 @@ export const useSpeechRecognition = ({ onResult, onError }: UseSpeechRecognition
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
   const [isListening, setIsListening] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const resultIndexRef = useRef(0) // 跟踪已处理的结果索引
 
   const start = useCallback(() => {
     if (!SpeechRecognition) {
@@ -54,6 +55,10 @@ export const useSpeechRecognition = ({ onResult, onError }: UseSpeechRecognition
     if (recognitionRef.current) {
       recognitionRef.current.stop()
     }
+    
+    // 重置结果索引
+    resultIndexRef.current = 0
+    
     const recognition = new SpeechRecognition()
     recognition.lang = 'ja-JP'
     recognition.continuous = true
@@ -77,16 +82,27 @@ export const useSpeechRecognition = ({ onResult, onError }: UseSpeechRecognition
       recognition.stop()
     }
     recognition.onresult = (event) => {
+      // 只处理新的结果，从 resultIndexRef.current 开始
       const results = Array.from(event.results)
+      const newResults = results.slice(resultIndexRef.current)
+      
+      // 更新已处理的结果索引
+      resultIndexRef.current = results.length
+      
+      // 提取新结果的文本
+      const newTexts = newResults
         .map((result) => result[0]?.transcript.trim())
         .filter(Boolean)
-      const finalText = results.join(' ').trim()
+      
+      const finalText = newTexts.join(' ').trim()
       if (finalText) {
+        console.log('[SpeechRecognition] 新识别结果:', finalText)
         onResult(finalText)
       }
     }
     recognition.onend = () => {
       setIsListening(false)
+      resultIndexRef.current = 0 // 重置索引
     }
 
     recognitionRef.current = recognition
