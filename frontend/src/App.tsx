@@ -136,6 +136,12 @@ function App() {
   const handleSubmit = async (event?: FormEvent) => {
     event?.preventDefault()
     if (!input.trim() || !activeSession) return
+    
+    // 如果正在语音输入，先停止
+    if (speech.isListening) {
+      speech.stop()
+    }
+    
     const text = input.trim()
     setInput('')
     const userMessageCount = activeSession.messages.filter((msg) => msg.role === 'user').length
