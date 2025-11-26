@@ -17,6 +17,7 @@ class UserLogin(BaseModel):
 # 用户信息更新请求
 class UserUpdate(BaseModel):
     username: Optional[str] = None
+    avatar: Optional[str] = None
     current_password: Optional[str] = None
     new_password: Optional[str] = None
 
@@ -32,6 +33,7 @@ class UserResponse(BaseModel):
     id: int
     email: str
     username: Optional[str] = None
+    avatar: Optional[str] = None
     is_active: bool
     is_verified: bool
 

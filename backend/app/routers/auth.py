@@ -22,7 +22,7 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
     """用户注册"""
     # 检查邮箱是否在白名单中
     whitelist = get_email_whitelist()
-    if user_data.email not in whitelist:
+    if whitelist is not None and user_data.email not in whitelist:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="该邮箱未在白名单中，目前仅限邀请注册"
@@ -86,6 +86,10 @@ def update_me(
     # 更新用户名
     if user_data.username is not None:
         current_user.username = user_data.username
+    
+    # 更新头像
+    if user_data.avatar is not None:
+        current_user.avatar = user_data.avatar
     
     # 更新密码
     if user_data.new_password:

@@ -44,8 +44,13 @@ def get_settings() -> Settings:
   return Settings()
 
 
-def get_email_whitelist() -> List[str]:
-  """从文件中读取邮箱白名单，支持热更新"""
+def get_email_whitelist() -> List[str] | None:
+  """从文件中读取邮箱白名单，支持热更新
+  
+  返回值:
+    - List[str]: 有效的邮箱白名单
+    - None: 白名单为空，开放注册
+  """
   settings = get_settings()
   whitelist_file = Path(settings.email_whitelist_file)
   
@@ -61,7 +66,8 @@ def get_email_whitelist() -> List[str]:
       for line in content.splitlines() 
       if line.strip() and not line.strip().startswith('#')
     ]
-    return whitelist
+    # 如果白名单为空，返回 None 表示开放注册
+    return whitelist if whitelist else None
   except Exception:
     # 出错时返回默认白名单
     return ['2507490921@qq.com']
