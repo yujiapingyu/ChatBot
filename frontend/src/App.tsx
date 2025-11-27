@@ -152,7 +152,7 @@ function App() {
     markSending(true)
     try {
       const contextMessages = [...rollingWindow(), { ...userMessage }]
-      const aiPayload = await requestChat(activeSession.id, contextMessages, conversationStyle)
+      const aiPayload = await requestChat(activeSession.id, contextMessages, conversationStyle, user?.username || 'Guest')
       const assistantMessage = await applyAiResponse(aiPayload)
       
       // 生成并更新标题

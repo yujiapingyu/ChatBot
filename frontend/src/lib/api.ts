@@ -14,11 +14,13 @@ export const requestChat = async (
   sessionId: string,
   messages: ChatMessage[],
   style: ConversationStyle,
+  username: string,
 ): Promise<AiResponsePayload> => {
   const payload = {
     sessionId,
     messages: messages.map((m) => ({ role: m.role, content: m.content })),
     style,
+    username,
   }
   const response = await fetch(`${BASE_URL}/chat`, {
     method: 'POST',
