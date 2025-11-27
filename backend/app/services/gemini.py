@@ -133,9 +133,11 @@ class GeminiService:
     messages_text = '\n'.join([f"{msg.role}: {msg.content}" for msg in payload.messages])
     last_user_message = next((msg.content for msg in reversed(payload.messages) if msg.role == 'user'), '')
     style_hint = STYLE_PROMPTS.get(payload.style, STYLE_PROMPTS['casual'])
+    username = payload.username if hasattr(payload, 'username') else '匿名用户'
     prompt = (
       f"{_SYSTEM_PROMPT}\n风格设定：{style_hint}\n\n用户上一句：{last_user_message}\n\n"
       f"对话记录（供参考，可精简使用）：\n{messages_text}"
+      f"\n\n用户姓名：{username},如果需要，请在反馈中适当调整称呼方式。"
     )
     response = self.chat_model.generate_content(
       contents=[
