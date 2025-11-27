@@ -28,7 +28,7 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
       setUsername(user.username || user.email.split('@')[0])
       setTimezone(user.timezone || 'Asia/Shanghai')
       setAvatar(user.avatar || null)
-      setPushUrl(user.pushUrl || '')
+      setPushUrl(user.push_url || '')
       console.log('UserProfileModal - 用户信息:', {
         hasAvatar: !!user.avatar,
         avatarLength: user.avatar?.length,
@@ -69,7 +69,7 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
         timezone?: string
         current_password?: string
         new_password?: string
-        pushUrl?: string
+        push_url?: string
       } = {}
 
       // 只有当用户名发生变化时才更新
@@ -94,8 +94,8 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
       }
 
       // 只有当推送地址发生变化时才更新
-      if (pushUrl !== user?.pushUrl) {
-        updateData.pushUrl = pushUrl
+      if (pushUrl !== user?.push_url) {
+        updateData.push_url = pushUrl
       }
 
       // 如果没有任何更新

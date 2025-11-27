@@ -61,7 +61,7 @@ export const authApi = {
     timezone?: string
     current_password?: string
     new_password?: string
-    pushUrl?: string
+    push_url?: string
   }): Promise<User> => {
     console.log('发送 updateProfile 请求:', {
       hasAvatar: !!data.avatar,

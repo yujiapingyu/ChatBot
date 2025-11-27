@@ -21,7 +21,7 @@ class UserUpdate(BaseModel):
     timezone: Optional[str] = None
     current_password: Optional[str] = None
     new_password: Optional[str] = None
-    pushUrl: Optional[str] = None
+    push_url: Optional[str] = None
 
 
 # Token 响应
@@ -36,7 +36,7 @@ class UserResponse(BaseModel):
     email: str
     username: Optional[str] = None
     avatar: Optional[str] = None
-    pushUrl: Optional[str] = None
+    push_url: Optional[str] = None
     timezone: Optional[str] = 'Asia/Shanghai'
     is_active: bool
     is_verified: bool

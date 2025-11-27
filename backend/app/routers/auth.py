@@ -101,8 +101,8 @@ def update_me(
         current_user.timezone = user_data.timezone
 
     # 更新推送地址
-    if user_data.pushUrl is not None:
-        current_user.pushUrl = user_data.pushUrl
+    if user_data.push_url is not None:
+        current_user.push_url = user_data.push_url
     
     # 更新密码
     if user_data.new_password:
