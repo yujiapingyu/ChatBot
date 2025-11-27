@@ -17,6 +17,7 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [pushUrl, setPushUrl] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isEditingAvatar, setIsEditingAvatar] = useState(false)
   const [avatarKey, setAvatarKey] = useState(0) // 强制重新渲染头像
@@ -27,6 +28,7 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
       setUsername(user.username || user.email.split('@')[0])
       setTimezone(user.timezone || 'Asia/Shanghai')
       setAvatar(user.avatar || null)
+      setPushUrl(user.pushUrl || '')
       console.log('UserProfileModal - 用户信息:', {
         hasAvatar: !!user.avatar,
         avatarLength: user.avatar?.length,
@@ -67,6 +69,7 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
         timezone?: string
         current_password?: string
         new_password?: string
+        pushUrl?: string
       } = {}
 
       // 只有当用户名发生变化时才更新
@@ -88,6 +91,11 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
       if (newPassword) {
         updateData.current_password = currentPassword
         updateData.new_password = newPassword
+      }
+
+      // 只有当推送地址发生变化时才更新
+      if (pushUrl !== user?.pushUrl) {
+        updateData.pushUrl = pushUrl
       }
 
       // 如果没有任何更新
@@ -267,6 +275,29 @@ export default function UserProfileModal({ isOpen, onClose }: UserProfileModalPr
                   placeholder="再次输入新密码"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* 推送配置区域 */}
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              推送配置
+            </h3>
+            <div>
+              <label htmlFor="pushUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                bark推送地址
+              </label>
+              <input
+                id="pushUrl"
+                type="url"
+                value={pushUrl}
+                onChange={(e) => setPushUrl(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 
+                         bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                         focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                         transition-all duration-200"
+                placeholder="https://example.com/webhook"
+              />
             </div>
           </div>
 

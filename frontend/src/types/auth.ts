@@ -21,4 +21,5 @@ export interface User {
   timezone?: string
   is_active: boolean
   is_verified: boolean
+  pushUrl?: string
 }

@@ -20,6 +20,7 @@ interface AuthState {
     timezone?: string
     current_password?: string
     new_password?: string
+    pushUrl?: string
   }) => Promise<void>
   clearError: () => void
 }
