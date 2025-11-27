@@ -41,11 +41,14 @@ export function convertToUserTimezone(utcDate: string | number, userTimezone?: s
  * @param userTimezone - 用户时区
  * @returns 格式化的时间字符串，如 "14:30"
  */
-export function formatTime(utcDate: string | number, userTimezone?: string): string {
+export function formatTime(utcDate: string | number, userTimezone?: string | null): string {
   const date = new Date(utcDate)
   
+  // 如果没有提供时区或为 null，使用 Asia/Shanghai 作为默认值
+  const timezone = userTimezone || 'Asia/Shanghai'
+  
   return new Intl.DateTimeFormat('zh-CN', {
-    timeZone: userTimezone || undefined,
+    timeZone: timezone,
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
@@ -58,11 +61,14 @@ export function formatTime(utcDate: string | number, userTimezone?: string): str
  * @param userTimezone - 用户时区
  * @returns 格式化的日期字符串，如 "2025/01/26"
  */
-export function formatDate(utcDate: string | number, userTimezone?: string): string {
+export function formatDate(utcDate: string | number, userTimezone?: string | null): string {
   const date = new Date(utcDate)
   
+  // 如果没有提供时区或为 null，使用 Asia/Shanghai 作为默认值
+  const timezone = userTimezone || 'Asia/Shanghai'
+  
   return new Intl.DateTimeFormat('zh-CN', {
-    timeZone: userTimezone || undefined,
+    timeZone: timezone,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
@@ -75,11 +81,14 @@ export function formatDate(utcDate: string | number, userTimezone?: string): str
  * @param userTimezone - 用户时区
  * @returns 格式化的日期时间字符串，如 "2025/01/26 14:30"
  */
-export function formatDateTime(utcDate: string | number, userTimezone?: string): string {
+export function formatDateTime(utcDate: string | number, userTimezone?: string | null): string {
   const date = new Date(utcDate)
   
+  // 如果没有提供时区或为 null，使用 Asia/Shanghai 作为默认值
+  const timezone = userTimezone || 'Asia/Shanghai'
+  
   return new Intl.DateTimeFormat('zh-CN', {
-    timeZone: userTimezone || undefined,
+    timeZone: timezone,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

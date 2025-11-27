@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 
@@ -14,14 +14,13 @@ class SessionTitleUpdate(BaseModel):
 
 
 class SessionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True, json_encoders={datetime: lambda v: v.isoformat() + 'Z' if v else None})
+    
     id: str
     title: str
     conversation_style: str
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 # Message schemas
@@ -34,6 +33,8 @@ class MessageCreate(BaseModel):
 
 
 class MessageResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True, json_encoders={datetime: lambda v: v.isoformat() + 'Z' if v else None})
+    
     id: str
     role: str
     content: str
@@ -41,9 +42,6 @@ class MessageResponse(BaseModel):
     feedback: Optional[dict] = None
     audio_base64: Optional[str] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 # Favorite schemas
@@ -60,6 +58,8 @@ class FavoriteUpdate(BaseModel):
 
 
 class FavoriteResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True, json_encoders={datetime: lambda v: v.isoformat() + 'Z' if v else None})
+    
     id: str
     text: str
     translation: Optional[str] = None
@@ -69,13 +69,7 @@ class FavoriteResponse(BaseModel):
     created_at: datetime
     last_reviewed_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 # Session with messages
 class SessionWithMessages(SessionResponse):
     messages: List[MessageResponse] = []
-
-    class Config:
-        from_attributes = True

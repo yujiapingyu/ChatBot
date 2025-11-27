@@ -71,8 +71,13 @@ def login(user_data: UserLogin, db: Session = Depends(get_db)):
 
 
 @router.get('/me', response_model=UserResponse)
-def get_me(current_user: User = Depends(get_current_active_user)):
+def get_me(current_user: User = Depends(get_current_active_user), db: Session = Depends(get_db)):
     """获取当前用户信息"""
+    # 如果用户的 timezone 为 None，设置默认值并保存
+    if current_user.timezone is None:
+        current_user.timezone = 'Asia/Shanghai'
+        db.commit()
+        db.refresh(current_user)
     return current_user
 
 
