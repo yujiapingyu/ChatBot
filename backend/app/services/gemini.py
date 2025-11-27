@@ -80,11 +80,12 @@ User: "会話力を上げるには、どうすればいい？"
   * 重点解释语感差异（ニュアンス）和场景适配性。
 - feedback.naturalnessScore: 0-100 整数。
 - reply: 纯日语回应。
-- replyTranslation: reply 的中文翻译。
+- replyTranslation: reply 的中文翻译，必须严格翻译成【中文】。
 
 【禁止行为】
 - 严禁在 feedback 中评论或修改你自己的 reply。
 - 严禁输出 JSON 代码块以外的任何文字。
+- 禁止翻译成其他语言（如英文、韩文、俄文等），必须翻译成【中文】。
 """
 
 TITLE_PROMPT = (
