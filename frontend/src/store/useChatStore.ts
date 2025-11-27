@@ -67,7 +67,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   activeSessionId: null,
   favorites: [],
   isSending: false,
-  sidebarOpen: true,
+  sidebarOpen: window.innerWidth >= 768, // 移动端默认关闭，桌面端默认打开
   favoritesOpen: false,
   flashcardIndex: 0,
   conversationStyle: 'casual',

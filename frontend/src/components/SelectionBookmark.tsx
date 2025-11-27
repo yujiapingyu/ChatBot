@@ -15,7 +15,7 @@ export const SelectionBookmark = () => {
       console.log('[SelectionBookmark] 调用 addFavorite...')
       await addFavorite(selectionState.text)
       console.log('[SelectionBookmark] 收藏成功')
-      toast.success('已加入收藏本')
+      toast.success('已加入收藏本', { duration: 1000 })
       clear()
       window.getSelection()?.removeAllRanges()
     } catch (error) {

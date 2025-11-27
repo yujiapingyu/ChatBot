@@ -68,6 +68,7 @@ function App() {
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [profileModalOpen, setProfileModalOpen] = useState(false)
   const [clearAllModalOpen, setClearAllModalOpen] = useState(false)
+  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme')
     return saved ? saved === 'dark' : true
@@ -158,6 +159,7 @@ function App() {
       if (shouldGenerateTitle) {
         // 不使用 setTimeout，直接等待
         try {
+          setIsGeneratingTitle(true)
           const title = await requestTitle(`${text}\n${aiPayload.reply}`)
           // 从 store 获取最新的 activeSessionId
           const latestSessionId = useChatStore.getState().activeSessionId
@@ -166,6 +168,8 @@ function App() {
           }
         } catch (err) {
           console.error('生成标题失败:', err)
+        } finally {
+          setIsGeneratingTitle(false)
         }
       }
       
@@ -422,7 +426,7 @@ function App() {
             })}
             {isSending && (
               <div className="flex items-center gap-2 text-sm text-slate-400">
-                <LoadingDots /> 正在思考中...
+                <LoadingDots /> {isGeneratingTitle ? '正在生成标题...' : '正在思考中...'}
               </div>
             )}
             <div ref={messagesEndRef} />
