@@ -27,7 +27,7 @@ class VoicevoxService:
         speaker_id = speaker or self.speaker_id
         
         try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
+            async with httpx.AsyncClient(timeout=60.0) as client:
                 # 步骤 1: 生成音频查询（audio_query）
                 query_response = await client.post(
                     f"{self.base_url}/audio_query",
