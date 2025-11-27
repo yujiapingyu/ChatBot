@@ -146,16 +146,7 @@ class GeminiService:
       },
     )
     data = self._safe_json(response)
-    
-    # 自动生成 AI 回复的音频
-    if 'reply' in data:
-      try:
-        data['audioBase64'] = self.tts(data['reply'])
-      except Exception as e:
-        print(f"TTS generation failed in chat: {e}")
-        # 即使 TTS 失败也继续返回文本响应
-        data['audioBase64'] = None
-    
+    # 注意：音频生成已移至异步路由层，这里不再自动生成
     return data
 
   def tts(self, text: str) -> str:

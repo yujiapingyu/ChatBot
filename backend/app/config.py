@@ -16,6 +16,10 @@ class Settings(BaseSettings):
   tts_model: str = 'gemini-2.5-flash-preview-tts'
   cors_origins: Union[str, List[str]] = 'http://localhost:5173'
   
+  # VOICEVOX 配置
+  voicevox_url: str = 'http://localhost:50021'
+  voicevox_speaker: int = 8  # 默认说话人 ID (春日部つむぎ)
+  
   # 数据库配置
   database_url: str = 'sqlite:///./chatbot.db'
   

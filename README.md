@@ -34,7 +34,7 @@
 
 - **前端**：React 19 + TypeScript + Vite + Tailwind CSS + Zustand
 - **后端**：FastAPI + SQLAlchemy + SQLite + Pydantic
-- **AI 服务**：Google Gemini API（Chat + TTS）
+- **AI 服务**：Google Gemini API（Chat）+ VOICEVOX（TTS）
 - **认证**：JWT + Argon2 密码哈希
 
 ## 环境准备
@@ -44,6 +44,25 @@
 - **Python**：3.9 或更高版本
 - **Node.js**：18.0 或更高版本
 - **npm**：9.0 或更高版本
+- **VOICEVOX**：用于文字转语音（必须）
+
+### VOICEVOX 安装
+
+本项目使用 VOICEVOX 进行日语语音合成，请先安装并启动：
+
+1. **下载 VOICEVOX**
+   - 访问：https://voicevox.hiroshiba.jp/
+   - 下载适合你操作系统的版本
+
+2. **启动 VOICEVOX**
+   - 打开 VOICEVOX 应用程序
+   - 确认 API 服务运行在 `http://localhost:50021`
+
+3. **验证安装**
+   ```bash
+   curl http://localhost:50021/version
+   ```
+   如果返回版本信息，说明安装成功。
 
 ### 后端环境配置
 
@@ -93,7 +112,11 @@ GOOGLE_API_KEY=your_gemini_api_key_here
 
 # 模型配置
 CHAT_MODEL=gemini-2.0-flash-exp
-TTS_MODEL=gemini-2.0-flash-tts-exp
+TTS_MODEL=gemini-2.5-flash-preview-tts
+
+# VOICEVOX TTS 配置
+VOICEVOX_URL=http://localhost:50021
+VOICEVOX_SPEAKER=8  # 说话人 ID（8=春日部つむぎ）
 
 # JWT 密钥（建议自行生成）
 SECRET_KEY=your_secret_key_here
